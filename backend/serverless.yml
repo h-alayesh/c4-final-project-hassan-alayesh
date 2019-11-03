@@ -154,7 +154,10 @@ functions:
           method: post
           path: todos/{todoId}/attachment
           cors: true
-
+          authorizer: Auth
+          documentation:
+            summary: Attach an image
+            description: Attach an image
 
 resources:
   Resources:

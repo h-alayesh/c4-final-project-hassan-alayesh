@@ -10,7 +10,7 @@ import { JwtPayload } from '../../auth/JwtPayload'
 const logger = createLogger('auth')
 
 const jwksUrl = 'https://test-endpoint.auth0.com/.well-known/jwks.json'
-const cert = Axios.get(jwksUrl).then(response => Promise.resolve(response.data))
+const jwkToPem = require('jwk-to-pem');
 export const handler = async (
   event: CustomAuthorizerEvent
 ): Promise<CustomAuthorizerResult> => {
@@ -57,8 +57,12 @@ async function verifyToken(authHeader: string): Promise<JwtPayload> {
 
   // TODO: Implement token verification
   try{
-    await cert
-    await verify(authHeader, cert, { algorithms: ['RS256'] } )
+    const jwk = await Axios.get(jwksUrl).then(response => Promise.resolve(response.data.keys))
+    const pem = jwkToPem(jwk)
+    const verified = verify(authHeader, pem, { algorithms: ['RS256'] } )
+    if (!verified){
+      return undefined
+    }
     return  jwt.payload
   }
     catch{

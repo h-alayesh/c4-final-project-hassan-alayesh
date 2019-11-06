@@ -57,7 +57,8 @@ async function verifyToken(authHeader: string): Promise<JwtPayload> {
 
   // TODO: Implement token verification
   try{
-    const jwk = await Axios.get(jwksUrl).then(response => Promise.resolve(response.data.keys))
+    const jwks = await Axios.get(jwksUrl).then(response => Promise.resolve(response.data.keys));
+    const jwk = jwks.filter((jwk) => jwk.kid === jwt.header.kid)[0];
     const pem = jwkToPem(jwk)
     const verified = verify(authHeader, pem, { algorithms: ['RS256'] } )
     if (!verified){

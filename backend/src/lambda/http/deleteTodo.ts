@@ -22,13 +22,14 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
     const split = authorization.split(' ')
     const jwtToken = split[1]
     const userId = parseUserId(jwtToken)
-
+    const delTodoItem = {
+    
+      "userId": userId,
+      "todoId": todoId
+    }
     await docClient.delete({
       TableName: todosTable,
-      Key:{
-        "userId": userId,
-        "todoId": todoId
-    }
+      Key: delTodoItem 
     }).promise()
 
     return {
@@ -37,9 +38,11 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true
       },
-      body: 'Todo Deleted'
+      body: JSON.stringify({
+        delTodoItem
+      })
     }
 
     //return undefined
   }
-)
+

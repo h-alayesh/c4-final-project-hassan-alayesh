@@ -26,18 +26,21 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
     const split = authorization.split(' ')
     const jwtToken = split[1]
     const userId = parseUserId(jwtToken)
-
-    await docClient.update({
-      TableName: todosTable,
-      Key:{
-        "userId": userId,
-        "todoId": todoId
-    },
-    ExpressionAttributeValues:{
+    const updTodoItem = {
+    
+      "userId": userId,
+      "todoId": todoId
+    }
+    const newTodoVal = {
+    
       "name": updatedTodo.name,
       "dueDate": updatedTodo.dueDate,
       "done": updatedTodo.done
-  },
+    }
+    await docClient.update({
+      TableName: todosTable,
+      Key: updTodoItem,
+      ExpressionAttributeValues:newTodoVal
     }).promise()
 
     return {
@@ -46,7 +49,9 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true
       },
-      body: 'Todo Updated'
+      body: JSON.stringify({
+        newTodoVal
+      })
     }
 
 

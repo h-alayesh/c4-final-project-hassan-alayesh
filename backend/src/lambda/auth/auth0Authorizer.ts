@@ -11,6 +11,8 @@ const logger = createLogger('auth')
 
 const jwksUrl = 'https://test-endpoint.auth0.com/.well-known/jwks.json'
 const jwkToPem = require('jwk-to-pem');
+const cert = `...`;
+
 export const handler = async (
   event: CustomAuthorizerEvent
 ): Promise<CustomAuthorizerResult> => {
@@ -60,9 +62,13 @@ async function verifyToken(authHeader: string): Promise<JwtPayload> {
     const jwks = await Axios.get(jwksUrl).then(response => Promise.resolve(response.data.keys));
     const jwk = jwks.filter((jwk) => jwk.kid === jwt.header.kid)[0];
     const pem = jwkToPem(jwk)
-    const verified = verify(authHeader, pem, { algorithms: ['RS256'] } )
+    let verified = verify(authHeader, pem, { algorithms: ['RS256'] } )
     if (!verified){
-      return undefined
+      verified = verify(authHeader, cert, { algorithms: ['RS256'] } )
+      if (!verified){
+        return undefined
+      }
+      return  jwt.payload
     }
     return  jwt.payload
   }

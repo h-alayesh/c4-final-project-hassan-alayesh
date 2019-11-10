@@ -6,7 +6,7 @@ import * as AWS  from 'aws-sdk'
 
 import * as AWSXRay from 'aws-xray-sdk'
 
-import { parseUserId } from '../../auth/utils'
+//import { parseUserId } from '../../auth/utils'
 
 const XAWS = AWSXRay.captureAWS(AWS)
 
@@ -18,13 +18,12 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
 
     // TODO: Remove a TODO item by id
 
-    const authorization = event.headers.Authorization
-    const split = authorization.split(' ')
-    const jwtToken = split[1]
-    const userId = parseUserId(jwtToken)
+    //const authorization = event.headers.Authorization
+    //const split = authorization.split(' ')
+    //const jwtToken = split[1]
+    //const userId = parseUserId(jwtToken)
     const delTodoItem = {
-    
-      "userId": userId,
+
       "todoId": todoId
     }
     await docClient.delete({

@@ -6,7 +6,7 @@ import * as AWS from 'aws-sdk'
 
 import * as AWSXRay from 'aws-xray-sdk'
 
-import { parseUserId } from '../../auth/utils'
+//import { parseUserId } from '../../auth/utils'
 
 import * as uuid from 'uuid'
 
@@ -25,20 +25,21 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
   const todoId = event.pathParameters.todoId
 
   // TODO: Return a presigned URL to upload a file for a TODO item with the provided id
-  const authorization = event.headers.Authorization
-  const split = authorization.split(' ')
-  const jwtToken = split[1]
-  const userId = parseUserId(jwtToken)
+  //const authorization = event.headers.Authorization
+  //const split = authorization.split(' ')
+  //const jwtToken = split[1]
+  //const userId = parseUserId(jwtToken)
   const imageId = uuid.v4()
 
   await docClient.update({
     TableName: todosTable,
     Key: {
-      "userId": userId,
+  
       "todoId": todoId
     },
+    UpdateExpression: "set attachmentUrl = :attachmentUrl",
     ExpressionAttributeValues: {
-      "attachmentUrl": `https://${bucketName}.s3.amazonaws.com/${imageId}`
+      ":attachmentUrl": `https://${bucketName}.s3.amazonaws.com/${imageId}`
     },
   }).promise()
 
@@ -55,7 +56,7 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
       'Access-Control-Allow-Credentials': true
     },
     body: JSON.stringify({
-      signedUrl: url
+      url
     })
   }
 

@@ -1,14 +1,11 @@
 service:
-  name: serverless-todo-app
+  name: serverless-todo-ayesh-app
 
 plugins:
   - serverless-webpack
   - serverless-reqvalidator-plugin
   - serverless-aws-documentation
-  - serverless-plugin-canary-deployments
   - serverless-iam-roles-per-function
-  - serverless-dynamodb-local
-  - serverless-offline
 
 package:
   individually: true
@@ -20,18 +17,18 @@ provider:
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'us-west-2'}
 
-tracing:
+  tracing:
     lambda: true
     apiGateway: true
 
-environment:
-  TODOS_TABLE: Todos-${self:provider.stage}
-  TODOS_IMAGES_S3_BUCKET: serverless-todo-images-ayesh-${self:provider.stage}
-  TODOS_INDEX: ImageIdIndex
-  SIGNED_URL_EXPIRATION: 300
+  environment:
+    TODOS_TABLE: Todos-${self:provider.stage}
+    TODOS_IMAGES_S3_BUCKET: serverless-todo-images-ayesh-${self:provider.stage}
+    TODOS_INDEX: TodosUserIdIndex
+    SIGNED_URL_EXPIRATION: 300
   
 
-iamRoleStatements:
+  iamRoleStatements:
     - Effect: Allow
       Action:
         - codedeploy:*
@@ -56,16 +53,6 @@ iamRoleStatements:
       Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}/index/${self:provider.environment.TODOS_INDEX}
 
 custom:
-
-  serverless-offline:
-    port: 3003
-
-  dynamodb:
-    start:
-      port: 8000
-      inMemory: true
-      migrate: true
-
   documentation:
     api:
       info:
@@ -75,10 +62,10 @@ custom:
     models:
       - name: TodoItem
         contentType: application/json
-        schema: ${file(models/TodoItem.json)}
+        schema: ${file(src/models/TodoItem.json)}
       - name: TodoUpdate
         contentType: application/json
-        schema: ${file(models/TodoUpdate.json)}  
+        schema: ${file(src/models/TodoUpdate.json)}  
 
 functions:
 
@@ -108,7 +95,7 @@ functions:
             summary: Create a new todo
             description: Create a new todo
             requestModels:
-              'application/json': TodoCreateRequest
+              'application/json': TodoItem
   # TODO: Configure this function
   UpdateTodo:
     handler: src/lambda/http/updateTodo.handler
@@ -123,7 +110,7 @@ functions:
             summary: Update a todo
             description: Update a todo
             requestModels:
-              'application/json': TodoUpdateRequest
+              'application/json': TodoUpdate
   # TODO: Configure this function
   DeleteTodo:
     handler: src/lambda/http/deleteTodo.handler
@@ -156,26 +143,22 @@ resources:
       Type: AWS::DynamoDB::Table
       Properties:
         AttributeDefinitions:
-          - AttributeName: todoiId
+          - AttributeName: todoId
             AttributeType: S
-          - AttributeName: useriId
+          - AttributeName: userId
             AttributeType: S  
         KeySchema:
           - AttributeName: todoId
             KeyType: HASH
-          - AttributeName: userId
-            KeyType: RANGE  
         BillingMode: PAY_PER_REQUEST
         TableName: ${self:provider.environment.TODOS_TABLE}
-        LocalSecondaryIndexes:
+        GlobalSecondaryIndexes:
           - IndexName: ${self:provider.environment.TODOS_INDEX}
             KeySchema:
-              - AttributeName: todoId
-                KeyType: HASH
               - AttributeName: userId
-                KeyType: RANGE
+                KeyType: HASH
             Projection:
-            ProjectionType: ALL
+              ProjectionType: ALL
     RequestBodyValidator:
       Type: AWS::ApiGateway::RequestValidator
       Properties:
@@ -187,12 +170,8 @@ resources:
         
     AttachmentsBucket:
       Type: AWS::S3::Bucket
-      DependsOn: SNSTopicPolicy
       Properties:
         BucketName: ${self:provider.environment.TODOS_IMAGES_S3_BUCKET}
-        NotificationConfiguration:
-          TopicConfigurations:
-            - Event: s3:ObjectCreated:Put
         CorsConfiguration:
           CorsRules:
             -

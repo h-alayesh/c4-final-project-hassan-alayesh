@@ -1,0 +1,47 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "TodoItem": {
+            "title": "TodoItem",
+            "type": "object",
+            "properties": {
+                "userId": {
+                    "type": "string",
+                    "title": "userId"
+                },
+                "todoId": {
+                    "type": "string",
+                    "title": "todoId"
+                },
+                "createdAt": {
+                    "type": "string",
+                    "title": "createdAt"
+                },
+                "name": {
+                    "type": "string",
+                    "title": "name"
+                },
+                "dueDate": {
+                    "type": "string",
+                    "title": "dueDate"
+                },
+                "done": {
+                    "type": "boolean",
+                    "title": "done"
+                },
+                "attachmentUrl": {
+                    "type": "string",
+                    "title": "attachmentUrl"
+                }
+            },
+            "required": [
+                "createdAt",
+                "done",
+                "dueDate",
+                "name",
+                "todoId",
+                "userId"
+            ]
+        }
+    }
+}

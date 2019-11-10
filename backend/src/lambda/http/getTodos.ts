@@ -20,7 +20,7 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
   const jwtToken = split[1]
   const userId = parseUserId(jwtToken)
 
-  if (userId = null) {
+  if (userId === null) {
     return {
       statusCode: 404,
       headers: {

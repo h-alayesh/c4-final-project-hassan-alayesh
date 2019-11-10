@@ -193,7 +193,6 @@ resources:
         NotificationConfiguration:
           TopicConfigurations:
             - Event: s3:ObjectCreated:Put
-              # Topic: !Ref ImagesTopic
         CorsConfiguration:
           CorsRules:
             -

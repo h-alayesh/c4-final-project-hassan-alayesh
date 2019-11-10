@@ -6,12 +6,12 @@ import { createLogger } from '../../utils/logger'
 import Axios from 'axios'
 import { Jwt } from '../../auth/Jwt'
 import { JwtPayload } from '../../auth/JwtPayload'
-
+import jwkToPem from 'jwk-to-pem'
 const logger = createLogger('auth')
 
-const jwksUrl = 'https://test-endpoint.auth0.com/.well-known/jwks.json'
-const jwkToPem = require('jwk-to-pem');
-const cert = `...`;
+const jwksUrl = '...'
+//const jwkToPem = require('jwk-to-pem');
+const cert = '...';
 
 export const handler = async (
   event: CustomAuthorizerEvent

@@ -56,7 +56,6 @@ iamRoleStatements:
       Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}/index/${self:provider.environment.TODOS_INDEX}
 
 custom:
-  topicName: todosimagesTopic-${self:provider.stage}
 
   serverless-offline:
     port: 3003
@@ -74,10 +73,10 @@ custom:
         title: Todos API
         description: Serverless application for todos lists
     models:
-      - name: TodoCreateRequest
+      - name: TodoItem
         contentType: application/json
         schema: ${file(models/TodoItem.json)}
-      - name: TodoUpdateRequest
+      - name: TodoUpdate
         contentType: application/json
         schema: ${file(models/TodoUpdate.json)}  
 
@@ -171,9 +170,9 @@ resources:
         LocalSecondaryIndexes:
           - IndexName: ${self:provider.environment.TODOS_INDEX}
             KeySchema:
-              - AttributeName: partitionKey
+              - AttributeName: todoId
                 KeyType: HASH
-              - AttributeName: indexKey
+              - AttributeName: userId
                 KeyType: RANGE
             Projection:
             ProjectionType: ALL
@@ -223,61 +222,3 @@ resources:
               Action: 's3:GetObject'
               Resource: 'arn:aws:s3:::${self:provider.environment.TODOS_IMAGES_S3_BUCKET}/*'
         Bucket: !Ref AttachmentsBucket
-    
-    # SNSTopicPolicy:
-    #   Type: AWS::SNS::TopicPolicy
-    #   Properties:
-    #     PolicyDocument:
-    #       Version: "2012-10-17"
-    #       Statement:
-    #         - Effect: Allow
-    #           Principal:
-    #             AWS: "*"
-    #           Action: sns:Publish
-    #           Resource:
-    #             !Ref ImagesTopic
-    #           Condition:
-    #             ArnLike:
-    #               AWS:SourceArn: arn:aws:s3:::${self:provider.environment.IMAGES_S3_BUCKET}
-    #     Topics:
-    #       - !Ref ImagesTopic
-
-    # ImagesTopic:
-    #   Type: AWS::SNS::Topic
-    #   Properties:
-    #     DisplayName: Image bucket topic
-    #     TopicName: ${self:custom.topicName}
-
-    KMSKey:
-      Type: AWS::KMS::Key
-      Properties:
-        Description: KMS key to encrypt Auth0 secret
-        KeyPolicy:
-          Version: '2012-10-17'
-          Id: key-default-1
-          Statement:
-            - Sid: Allow administration of the key
-              Effect: Allow
-              Principal:
-                AWS:
-                  Fn::Join:
-                  - ':'
-                  - - 'arn:aws:iam:'
-                    - Ref: AWS::AccountId
-                    - 'root'
-              Action:
-                - 'kms:*'
-              Resource: '*'
-
-    KMSKeyAlias:
-      Type: AWS::KMS::Alias
-      Properties:
-        AliasName: alias/auth0Key-${self:provider.stage}
-        TargetKeyId: !Ref KMSKey
-
-    Auth0Secret:
-      Type: AWS::SecretsManager::Secret
-      Properties:
-        Name: ${self:provider.environment.AUTH_0_SECRET_ID}
-        Description: Auth0 secret
-        KmsKeyId: !Ref KMSKey

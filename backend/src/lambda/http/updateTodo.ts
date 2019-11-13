@@ -8,7 +8,6 @@ import * as AWS  from 'aws-sdk'
 
 import * as AWSXRay from 'aws-xray-sdk'
 
-//import { parseUserId } from '../../auth/utils'
 
 const XAWS = AWSXRay.captureAWS(AWS)
 
@@ -22,10 +21,6 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
 
   // TODO: Update a TODO item with the provided id using values in the "updatedTodo" object
 
-  //const authorization = event.headers.Authorization
-    //const split = authorization.split(' ')
-    //const jwtToken = split[1]
-    //const userId = parseUserId(jwtToken)
     const updTodoItem = {
   
       "todoId": todoId
@@ -39,12 +34,16 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
     await docClient.update({
       TableName: todosTable,
       Key: updTodoItem,
-      UpdateExpression: "set name=:name, dueDate=:dueDate, done=:done",
+      UpdateExpression: "set #nm=:nm, dueDate=:dueDate, done=:done",
       ExpressionAttributeValues: {
-        ":name": newTodoVal.name,
+        ":nm": newTodoVal.name,
         ":dueDate": newTodoVal.dueDate,
         ":done": newTodoVal.done
-      }
+      },
+      ExpressionAttributeNames:{
+        "#nm": "name"
+      },
+      ReturnValues: "UPDATED_NEW"
     }).promise()
 
     return {
@@ -53,11 +52,9 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true
       },
-      body: JSON.stringify({
-        newTodoVal
-      })
+      body: JSON.stringify(
+        undefined
+      )
     }
 
-
-  //return undefined
 }

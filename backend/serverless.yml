@@ -5,7 +5,7 @@ plugins:
   - serverless-webpack
   - serverless-reqvalidator-plugin
   - serverless-aws-documentation
-  - serverless-iam-roles-per-function
+
 
 package:
   individually: true
@@ -25,7 +25,7 @@ provider:
     TODOS_TABLE: Todos-${self:provider.stage}
     TODOS_IMAGES_S3_BUCKET: serverless-todo-images-ayesh-${self:provider.stage}
     TODOS_INDEX: TodosUserIdIndex
-    SIGNED_URL_EXPIRATION: 300
+    
   
 
   iamRoleStatements:

@@ -12,6 +12,9 @@ import * as AWSXRay from 'aws-xray-sdk'
 
 import { parseUserId } from '../../auth/utils'
 
+//import { createLogger } from '../../utils/logger'
+
+//const logger = createLogger('post todo')
 
 const XAWS = AWSXRay.captureAWS(AWS)
 
@@ -29,14 +32,13 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
   const jwtToken = split[1]
 
   const newTodoItem = {
-    
-    userId: parseUserId(jwtToken),
+
     todoId: todoId,
+    userId: parseUserId(jwtToken),
     createdAt: new Date().toISOString(),
     name: newTodo.name,
     dueDate: newTodo.dueDate,
-    done: false,
-    
+    done: false
     
   }
 
@@ -51,9 +53,11 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Credentials': true
     },
-    body: JSON.stringify({
-      newTodoItem
-    })
+    body: JSON.stringify(
+      
+      {
+        item: newTodoItem
+      }
+    )
   }
-  //return undefined
 }

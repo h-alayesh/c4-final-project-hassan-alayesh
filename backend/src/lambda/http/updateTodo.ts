@@ -4,15 +4,9 @@ import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult } f
 
 import { UpdateTodoRequest } from '../../requests/UpdateTodoRequest'
 
-import * as AWS  from 'aws-sdk'
+import { TodoAccess } from '../../dataLayer/todoAccess'
 
-import * as AWSXRay from 'aws-xray-sdk'
-
-
-const XAWS = AWSXRay.captureAWS(AWS)
-
-const docClient = new XAWS.DynamoDB.DocumentClient()
-const todosTable = process.env.TODOS_TABLE
+const todoAccess = new TodoAccess()
 
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
@@ -21,30 +15,14 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
 
   // TODO: Update a TODO item with the provided id using values in the "updatedTodo" object
 
-    const updTodoItem = {
-  
-      "todoId": todoId
-    }
     const newTodoVal = {
     
       "name": updatedTodo.name,
       "dueDate": updatedTodo.dueDate,
       "done": updatedTodo.done
     }
-    await docClient.update({
-      TableName: todosTable,
-      Key: updTodoItem,
-      UpdateExpression: "set #nm=:nm, dueDate=:dueDate, done=:done",
-      ExpressionAttributeValues: {
-        ":nm": newTodoVal.name,
-        ":dueDate": newTodoVal.dueDate,
-        ":done": newTodoVal.done
-      },
-      ExpressionAttributeNames:{
-        "#nm": "name"
-      },
-      ReturnValues: "UPDATED_NEW"
-    }).promise()
+    
+    await todoAccess.updateTodo(todoId, newTodoVal)
 
     return {
       statusCode: 200,

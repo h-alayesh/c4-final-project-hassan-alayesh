@@ -2,17 +2,11 @@ import 'source-map-support/register'
 
 import { APIGatewayProxyEvent, APIGatewayProxyResult, APIGatewayProxyHandler } from 'aws-lambda'
 
-import * as AWS  from 'aws-sdk'
-
-import * as AWSXRay from 'aws-xray-sdk'
-
 import { parseUserId } from '../../auth/utils'
 
-const XAWS = AWSXRay.captureAWS(AWS)
+import { TodoAccess } from '../../dataLayer/todoAccess'
 
-const docClient = new XAWS.DynamoDB.DocumentClient()
-const todosTable = process.env.TODOS_TABLE
-const todosIndex = process.env.TODOS_INDEX
+const todoAccess = new TodoAccess()
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   // TODO: Get all TODO items for a current user
@@ -34,15 +28,7 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
     }
   }
 
-  const result = await docClient.query({
-    TableName: todosTable,
-    IndexName: todosIndex,
-    KeyConditionExpression: 'userId = :userId',
-    ExpressionAttributeValues: {
-      ':userId': userId
-    },
-    ScanIndexForward: false
-  }).promise()
+  const result = await todoAccess.getTodos( userId )
 
   return {
     statusCode: 201,
@@ -51,7 +37,7 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
       'Access-Control-Allow-Credentials': true
     },
     body: JSON.stringify({
-      items: result.Items
+      items: result
     })
   }
 

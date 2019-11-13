@@ -6,8 +6,6 @@ import * as AWS  from 'aws-sdk'
 
 import * as AWSXRay from 'aws-xray-sdk'
 
-//import { parseUserId } from '../../auth/utils'
-
 const XAWS = AWSXRay.captureAWS(AWS)
 
 const docClient = new XAWS.DynamoDB.DocumentClient()
@@ -18,10 +16,6 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
 
     // TODO: Remove a TODO item by id
 
-    //const authorization = event.headers.Authorization
-    //const split = authorization.split(' ')
-    //const jwtToken = split[1]
-    //const userId = parseUserId(jwtToken)
     const delTodoItem = {
 
       "todoId": todoId
@@ -37,11 +31,10 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true
       },
-      body: JSON.stringify({
-        delTodoItem
-      })
+      body: JSON.stringify(
+        undefined
+      )
     }
 
-    //return undefined
   }
 

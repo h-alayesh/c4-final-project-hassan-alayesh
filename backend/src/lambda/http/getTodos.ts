@@ -12,6 +12,7 @@ const XAWS = AWSXRay.captureAWS(AWS)
 
 const docClient = new XAWS.DynamoDB.DocumentClient()
 const todosTable = process.env.TODOS_TABLE
+const todosIndex = process.env.TODOS_INDEX
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   // TODO: Get all TODO items for a current user
@@ -24,7 +25,8 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
     return {
       statusCode: 404,
       headers: {
-        'Access-Control-Allow-Origin': '*'
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true
       },
       body: JSON.stringify({
         error: 'User does not exist'
@@ -34,6 +36,7 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
 
   const result = await docClient.query({
     TableName: todosTable,
+    IndexName: todosIndex,
     KeyConditionExpression: 'userId = :userId',
     ExpressionAttributeValues: {
       ':userId': userId
@@ -44,7 +47,8 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
   return {
     statusCode: 201,
     headers: {
-      'Access-Control-Allow-Origin': '*'
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Credentials': true
     },
     body: JSON.stringify({
       items: result.Items

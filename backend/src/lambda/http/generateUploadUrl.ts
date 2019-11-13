@@ -6,9 +6,8 @@ import * as AWS from 'aws-sdk'
 
 import * as AWSXRay from 'aws-xray-sdk'
 
-//import { parseUserId } from '../../auth/utils'
-
 import * as uuid from 'uuid'
+
 
 const XAWS = AWSXRay.captureAWS(AWS)
 
@@ -19,16 +18,12 @@ const s3 = new XAWS.S3({
 
 const todosTable = process.env.TODOS_TABLE
 const bucketName = process.env.TODOS_IMAGES_S3_BUCKET
-const urlExpiration = process.env.SIGNED_URL_EXPIRATION
+const urlExpiration = 300
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   const todoId = event.pathParameters.todoId
 
   // TODO: Return a presigned URL to upload a file for a TODO item with the provided id
-  //const authorization = event.headers.Authorization
-  //const split = authorization.split(' ')
-  //const jwtToken = split[1]
-  //const userId = parseUserId(jwtToken)
   const imageId = uuid.v4()
 
   await docClient.update({
@@ -41,9 +36,10 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
     ExpressionAttributeValues: {
       ":attachmentUrl": `https://${bucketName}.s3.amazonaws.com/${imageId}`
     },
+    ReturnValues: "UPDATED_NEW"
   }).promise()
 
-  const url = s3.getSignedUrl('putObject', {
+  const url:String = s3.getSignedUrl('putObject', {
     Bucket: bucketName,
     Key: imageId,
     Expires: urlExpiration
@@ -56,9 +52,11 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
       'Access-Control-Allow-Credentials': true
     },
     body: JSON.stringify({
-      url
-    })
+
+      uploadUrl: url
+    }
+      
+    )
   }
 
-  //return undefined
 }
